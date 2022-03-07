@@ -76,6 +76,10 @@ namespace BasicHologram
         virtual void OnDeviceLost() = 0;
         virtual void OnDeviceRestored() = 0;
 
+		virtual std::shared_ptr<BasicHologram::AccelRenderer> GetAccelRenderer() const { }
+		virtual std::shared_ptr<BasicHologram::GyroRenderer> GetGyroRenderer() const { }
+		virtual std::shared_ptr<BasicHologram::MagRenderer> GetMagRenderer() const { }
+
     protected:
         std::shared_ptr<DX::DeviceResources>                        m_deviceResources;
         winrt::Windows::Perception::Spatial::SpatialStationaryFrameOfReference m_stationaryReferenceFrame = nullptr;

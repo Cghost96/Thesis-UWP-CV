@@ -164,8 +164,8 @@
       <AdditionalOptions>/bigobj /await /std:c++latest  %(AdditionalOptions)</AdditionalOptions>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
-      <CompileAsWinRT>false</CompileAsWinRT>
-      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <CompileAsWinRT>true</CompileAsWinRT>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -202,7 +202,7 @@
       <CompileAsWinRT>false</CompileAsWinRT>
       <Optimization>Disabled</Optimization>
       <WholeProgramOptimization>false</WholeProgramOptimization>
-      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -211,6 +211,7 @@
     <ClInclude Include="Common\DeviceResources.h" />
     <ClInclude Include="Common\DirectXHelper.h" />
     <ClInclude Include="Common\CameraResources.h" />
+    <ClInclude Include="Common\Helper.h" />
     <ClInclude Include="Common\StepTimer.h" />
     <ClInclude Include="Content\AccelRenderer.h" />
     <ClInclude Include="Content\GyroRenderer.h" />

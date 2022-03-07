@@ -4,6 +4,7 @@
 #include <string>
 #include <ostream>
 #include <filesystem>
+#include <tuple>
 
 #include <debugapi.h>
 
@@ -39,18 +40,34 @@ namespace BasicHologram {
 
 
 
-		inline std::string SetupDataFolder() {
-			Platform::String^ folder = ApplicationData::Current->LocalFolder->Path + "\\Meshes";
-			std::wstring folderW(folder->Begin());
-			std::string folderA(folderW.begin(), folderW.end());
-			if (std::filesystem::exists(folderA)) {
-				std::filesystem::remove_all(folderA);
+		inline std::tuple<std::string, std::string, std::string> SetupDataFolders() {
+			Platform::String^ accFolder = ApplicationData::Current->LocalFolder->Path + "\\Accelerometer";
+			Platform::String^ gyroFolder = ApplicationData::Current->LocalFolder->Path + "\\Gyroscope";
+			Platform::String^ magFolder = ApplicationData::Current->LocalFolder->Path + "\\Magnetometer";
+			std::wstring accFolderW(accFolder->Begin());
+			std::wstring gyroFolderW(gyroFolder->Begin());
+			std::wstring magFolderW(magFolder->Begin());
+			std::string accFolderA(accFolderW.begin(), accFolderW.end());
+			std::string gyroFolderA(gyroFolderW.begin(), gyroFolderW.end());
+			std::string magFolderA(magFolderW.begin(), magFolderW.end());
+			if (std::filesystem::exists(accFolderA)) {
+				std::filesystem::remove_all(accFolderA);
+			}
+			if (std::filesystem::exists(gyroFolderA)) {
+				std::filesystem::remove_all(gyroFolderA);
+			}
+			if (std::filesystem::exists(magFolderA)) {
+				std::filesystem::remove_all(magFolderA);
 			}
 
-			ApplicationData::Current->LocalFolder->CreateFolderAsync("Meshes", CreationCollisionOption::FailIfExists);
-			std::string folderString = (std::string)folderA.c_str();
+			ApplicationData::Current->LocalFolder->CreateFolderAsync("Accelerometer", CreationCollisionOption::FailIfExists);
+			ApplicationData::Current->LocalFolder->CreateFolderAsync("Gyroscope", CreationCollisionOption::FailIfExists);
+			ApplicationData::Current->LocalFolder->CreateFolderAsync("Magnetometer", CreationCollisionOption::FailIfExists);
+			std::string accFolderString = (std::string)accFolderA.c_str();
+			std::string gyroFolderString = (std::string)gyroFolderA.c_str();
+			std::string magFolderString = (std::string)magFolderA.c_str();
 
-			return folderString;
+			return {accFolderString, gyroFolderString, magFolderString};
 		}
 	}
 }

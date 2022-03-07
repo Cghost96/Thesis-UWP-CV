@@ -99,13 +99,21 @@ void GyroRenderer::GyroUpdateLoop()
                 DebugBreak();
             }
 
-            sprintf(printString, "####Gyro: % 3.4f % 3.4f % 3.4f %I64d %I64d\n",
-                m_gyroSample.x,
-                m_gyroSample.y,
-                m_gyroSample.z,
-                    (((timeStamp.HostTicks - lastSocTick) * 1000) / timeStamp.HostTicksPerSecond), // Milliseconds
-                timeInMilliseconds);
-            OutputDebugStringA(printString);
+			m_gyroData.push_back({
+				m_gyroSample.x,
+				m_gyroSample.y,
+				m_gyroSample.z,
+				(((timeStamp.HostTicks - lastSocTick) * 1000) / timeStamp.HostTicksPerSecond),
+				timeInMilliseconds
+			});
+
+            //sprintf(printString, "####Gyro: % 3.4f % 3.4f % 3.4f %I64d %I64d\n",
+            //    m_gyroSample.x,
+            //    m_gyroSample.y,
+            //    m_gyroSample.z,
+            //        (((timeStamp.HostTicks - lastSocTick) * 1000) / timeStamp.HostTicksPerSecond), // Milliseconds
+            //    timeInMilliseconds);
+            //OutputDebugStringA(printString);
         }
         lastSocTick = timeStamp.HostTicks;
         lastQpcNow = uqpcNow;

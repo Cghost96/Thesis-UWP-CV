@@ -34,6 +34,9 @@ namespace BasicHologram
         static void CamAccessOnComplete(ResearchModeSensorConsent consent);
         static void ImuAccessOnComplete(ResearchModeSensorConsent consent);
 
+        std::shared_ptr<BasicHologram::AccelRenderer> GetAccelRenderer() const { return m_AccelRenderer; }
+        std::shared_ptr<BasicHologram::GyroRenderer> GetGyroRenderer() const { return m_GyroRenderer; }
+        std::shared_ptr<BasicHologram::MagRenderer> GetMagRenderer() const { return m_MagRenderer; }
     protected:
 
         IResearchModeSensorDevice *m_pSensorDevice;

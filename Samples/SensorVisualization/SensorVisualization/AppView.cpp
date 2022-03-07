@@ -11,6 +11,7 @@
 
 #include "pch.h"
 #include "AppView.h"
+#include "Common/Helper.h"
 
 using namespace BasicHologram;
 
@@ -55,6 +56,12 @@ void AppView::Initialize(CoreApplicationView const& applicationView)
     // At this point we have access to the device and we can create device-dependent
     // resources.
     m_deviceResources = std::make_shared<DX::DeviceResources>();
+
+    // Set static folder variables
+    auto folders = Helper::SetupDataFolders();
+    AccelRenderer::accFolderPath = std::get<0>(folders);
+    GyroRenderer::gyroFolderPath = std::get<1>(folders);
+    MagRenderer::magFolderPath = std::get<2>(folders);
 
     m_main = std::make_unique<BasicHologramMain>(m_deviceResources);
 }

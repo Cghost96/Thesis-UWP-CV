@@ -17,6 +17,9 @@
 #include "researchmode\ResearchModeApi.h"
 #include <Texture2D.h>
 
+#include <vector>
+#include <tuple>
+
 namespace BasicHologram
 {
     // This sample renderer instantiates a basic rendering pipeline.
@@ -40,6 +43,11 @@ namespace BasicHologram
                 m_pGyroSensor->Release();
             }
         }
+
+        using GyroDataTuple = std::tuple<float, float, float, uint64_t, uint64_t>;
+
+        inline static std::string gyroFolderPath;
+
         void Update(DX::StepTimer const& timer);
         void UpdateSample();
 
@@ -51,6 +59,7 @@ namespace BasicHologram
 
         void GetGyroSample(DirectX::XMFLOAT3 *pGyroSample);
 
+        const std::vector<BasicHologram::GyroRenderer::GyroDataTuple>* GyroData() const { return &m_gyroData; }
     private:
         static void GyroUpdateThread(GyroRenderer* pSpinningCube, HANDLE hasData, ResearchModeSensorConsent *pCamAccessConsent);
         void GyroUpdateLoop();
@@ -66,6 +75,8 @@ namespace BasicHologram
 
         std::thread *m_pAccelUpdateThread;
         bool m_fExit = { false };
+
+        std::vector<GyroDataTuple> m_gyroData;
     };
 
 }

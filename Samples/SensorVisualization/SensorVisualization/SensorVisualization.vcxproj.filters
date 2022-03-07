@@ -118,6 +118,7 @@
     <ClInclude Include="Content\MagRenderer.h">
       <Filter>Content</Filter>
     </ClInclude>
+    <ClInclude Include="Common\Helper.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Content\GeometryShader.hlsl">

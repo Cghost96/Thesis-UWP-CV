@@ -40,6 +40,11 @@ namespace BasicHologram
                 m_pAccelSensor->Release();
             }
         }
+
+        using AccDataTuple = std::tuple<float, float, float, float, uint64_t, uint64_t>;
+
+        inline static std::string accFolderPath;
+
         void Update(DX::StepTimer const& timer);
         void UpdateSample();
 
@@ -51,6 +56,7 @@ namespace BasicHologram
 
         void GetAccelSample(DirectX::XMFLOAT3 *pAccleSample);
 
+        const std::vector<BasicHologram::AccelRenderer::AccDataTuple>* AccData() const { return &m_accData; }
     private:
         static void AccelUpdateThread(AccelRenderer* pSpinningCube, HANDLE hasData, ResearchModeSensorConsent *pCamAccessConsent);
         void AccelUpdateLoop();
@@ -66,6 +72,8 @@ namespace BasicHologram
 
         std::thread *m_pAccelUpdateThread;
         bool m_fExit = { false };
+
+		std::vector<AccDataTuple> m_accData;
     };
 
 }
