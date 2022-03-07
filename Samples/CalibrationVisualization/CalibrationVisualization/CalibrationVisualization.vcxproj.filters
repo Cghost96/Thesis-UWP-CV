@@ -98,6 +98,9 @@
     <ClInclude Include="Texture2D.h">
       <Filter>Content</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\SpatialMapping\Common\Helper.h">
+      <Filter>Common</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Content\GeometryShader.hlsl">

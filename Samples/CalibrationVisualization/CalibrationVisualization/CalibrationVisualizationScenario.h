@@ -37,7 +37,9 @@ namespace BasicHologram
     protected:
 
         IResearchModeSensorDevice *m_pSensorDevice;
+
         std::vector<ResearchModeSensorDescriptor> m_sensorDescriptors;
+
         IResearchModeSensor *m_pLFCameraSensor = nullptr;
         DirectX::XMFLOAT4X4 m_LFCameraPose;
 
@@ -54,6 +56,7 @@ namespace BasicHologram
         DirectX::XMFLOAT4X4 m_LTCameraPose;
 
         std::vector<std::shared_ptr<ModelRenderer>> m_modelRenderers;
+
         int m_state = 0;
         double m_lastUpdateTime = 0.0;
 
