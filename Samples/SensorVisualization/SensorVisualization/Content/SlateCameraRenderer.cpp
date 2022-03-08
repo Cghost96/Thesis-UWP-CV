@@ -199,7 +199,6 @@ BYTE ConvertDepthPixel(USHORT v, BYTE bSigma, USHORT mask, USHORT maxshort, cons
 void SlateCameraRenderer::UpdateTextureFromCameraFrame(IResearchModeSensorFrame* pSensorFrame, std::shared_ptr<Texture2D> texture2D)
 {
     HRESULT hr = S_OK;
-    char printString[1000];
     UINT32 gain = 0;
     UINT64 exposure = 0;
 
@@ -210,6 +209,16 @@ void SlateCameraRenderer::UpdateTextureFromCameraFrame(IResearchModeSensorFrame*
     const BYTE *pImage = nullptr;
 
     pSensorFrame->GetResolution(&resolution);
+
+    char printString[1000];
+	sprintf(printString, "####Resolution: Width: %I64d Height: %I64d Stride: %I64d BitsPerPixel: %I64d BytesPerPixel: %I64d\n",
+        resolution.Width,
+        resolution.Height,
+        resolution.Stride,
+        resolution.BitsPerPixel,
+        resolution.BytesPerPixel
+    );
+    OutputDebugStringA(printString);
 
     hr = pSensorFrame->QueryInterface(IID_PPV_ARGS(&pVLCFrame));
 
@@ -266,7 +275,7 @@ void SlateCameraRenderer::UpdateTextureFromCameraFrame(IResearchModeSensorFrame*
         if (m_pRMCameraSensor->GetSensorType() == DEPTH_LONG_THROW)
         {
             mask = 0x80;
-            maxClampDepth = 4000;
+            maxClampDepth = 4000; // #CHECK millimeters???
         }
         else if (m_pRMCameraSensor->GetSensorType() == DEPTH_AHAT)
         {
