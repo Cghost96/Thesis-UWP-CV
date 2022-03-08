@@ -58,10 +58,10 @@ void AppView::Initialize(CoreApplicationView const& applicationView)
     m_deviceResources = std::make_shared<DX::DeviceResources>();
 
     // Set static folder variables
-    auto folders = Helper::SetupDataFolders();
-    AccelRenderer::accFolderPath = std::get<0>(folders);
-    GyroRenderer::gyroFolderPath = std::get<1>(folders);
-    MagRenderer::magFolderPath = std::get<2>(folders);
+    /*auto folders = */Helper::SetupDataFolders();
+    //AccelRenderer::accFolderPath = std::get<0>(folders);
+    //GyroRenderer::gyroFolderPath = std::get<1>(folders);
+    //MagRenderer::magFolderPath = std::get<2>(folders);
 
     m_main = std::make_unique<BasicHologramMain>(m_deviceResources);
 }

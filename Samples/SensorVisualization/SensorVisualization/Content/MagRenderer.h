@@ -44,9 +44,9 @@ namespace BasicHologram
             }
         }
 
-        using MagDataTuple = std::tuple<float, float, float, uint64_t, uint64_t>;
+        //using MagDataTuple = std::tuple<float, float, float, uint64_t, uint64_t>;
 
-        inline static std::string magFolderPath;
+        //inline static std::string magFolderPath;
 
         void Update(DX::StepTimer const& timer);
         void UpdateSample();
@@ -59,7 +59,7 @@ namespace BasicHologram
 
         void GetMagSample(DirectX::XMFLOAT3 *pAccleSample);
 
-        const std::vector<BasicHologram::MagRenderer::MagDataTuple>* MagData() const { return &m_magData; }
+        //const std::vector<BasicHologram::MagRenderer::MagDataTuple>* MagData() const { return &m_magData; }
     private:
         static void MagUpdateThread(MagRenderer* pSpinningCube, HANDLE hasData, ResearchModeSensorConsent *pCamAccessConsent);
         void MagUpdateLoop();
@@ -76,7 +76,7 @@ namespace BasicHologram
         std::thread *m_pAccelUpdateThread;
         bool m_fExit = { false };
 
-		std::vector<MagDataTuple> m_magData;
+		//std::vector<MagDataTuple> m_magData;
     };
 
 }

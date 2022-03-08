@@ -398,62 +398,62 @@ bool BasicHologramMain::Render(HolographicFrame const& holographicFrame)
 
 void BasicHologramMain::SaveAppState()
 {
-    auto const accData = m_scenario->GetAccelRenderer()->AccData();
-    auto const gyroData = m_scenario->GetGyroRenderer()->GyroData();
-    auto const magData = m_scenario->GetMagRenderer()->MagData();
+ //   auto const accData = m_scenario->GetAccelRenderer()->AccData();
+ //   auto const gyroData = m_scenario->GetGyroRenderer()->GyroData();
+ //   auto const magData = m_scenario->GetMagRenderer()->MagData();
 
-	char accFile[512];
-	std::snprintf(accFile, 512, "%s\\accelerometer.csv", AccelRenderer::accFolderPath);
-	std::ofstream accFileOut(accFile, std::ios::out);
+	//char accFile[512];
+	//std::snprintf(accFile, 512, "%s\\accelerometer.csv", AccelRenderer::accFolderPath);
+	//std::ofstream accFileOut(accFile, std::ios::out);
 
-    accFileOut << "x, y, z, sqrtSum, milliseconds, timeInMilliseconds\n";
+ //   accFileOut << "x, y, z, sqrtSum, milliseconds, timeInMilliseconds\n";
 
-    for (auto const& tuple : *accData) {
-        auto const x = std::get<0>(tuple);
-        auto const y = std::get<1>(tuple);
-        auto const z = std::get<2>(tuple);
-        auto const sqrtSum = std::get<3>(tuple);
-        auto const millis = std::get<4>(tuple);
-        auto const timeMillis = std::get<5>(tuple);
+ //   for (auto const& tuple : *accData) {
+ //       auto const x = std::get<0>(tuple);
+ //       auto const y = std::get<1>(tuple);
+ //       auto const z = std::get<2>(tuple);
+ //       auto const sqrtSum = std::get<3>(tuple);
+ //       auto const millis = std::get<4>(tuple);
+ //       auto const timeMillis = std::get<5>(tuple);
 
-        accFileOut << x << ", " << y << ", " << z << ", " << sqrtSum << ", " << millis << ", " << timeMillis << "\n";
-    }
+ //       accFileOut << x << ", " << y << ", " << z << ", " << sqrtSum << ", " << millis << ", " << timeMillis << "\n";
+ //   }
 
-    accFileOut.close();
+ //   accFileOut.close();
 
-	char gyroFile[512];
-	std::snprintf(gyroFile, 512, "%s\\gyrometer.csv", GyroRenderer::gyroFolderPath);
-	std::ofstream gyroFileOut(gyroFile, std::ios::out);
+	//char gyroFile[512];
+	//std::snprintf(gyroFile, 512, "%s\\gyrometer.csv", GyroRenderer::gyroFolderPath);
+	//std::ofstream gyroFileOut(gyroFile, std::ios::out);
 
-    gyroFileOut << "x, y, z, milliseconds, timeInMilliseconds\n";
+ //   gyroFileOut << "x, y, z, milliseconds, timeInMilliseconds\n";
 
-    for (auto const& tuple : *gyroData) {
-        auto const x = std::get<0>(tuple);
-        auto const y = std::get<1>(tuple);
-        auto const z = std::get<2>(tuple);
-        auto const millis = std::get<3>(tuple);
-        auto const timeMillis = std::get<4>(tuple);
+ //   for (auto const& tuple : *gyroData) {
+ //       auto const x = std::get<0>(tuple);
+ //       auto const y = std::get<1>(tuple);
+ //       auto const z = std::get<2>(tuple);
+ //       auto const millis = std::get<3>(tuple);
+ //       auto const timeMillis = std::get<4>(tuple);
 
-        gyroFileOut << x << ", " << y << ", " << z << ", " << millis << ", " << timeMillis << "\n";
-    }
+ //       gyroFileOut << x << ", " << y << ", " << z << ", " << millis << ", " << timeMillis << "\n";
+ //   }
 
-    gyroFileOut.close();
+ //   gyroFileOut.close();
 
-	char magFile[512];
-	std::snprintf(magFile, 512, "%s\\magnetometer.csv", MagRenderer::magFolderPath);
-	std::ofstream magFileOut(magFile, std::ios::out);
+	//char magFile[512];
+	//std::snprintf(magFile, 512, "%s\\magnetometer.csv", MagRenderer::magFolderPath);
+	//std::ofstream magFileOut(magFile, std::ios::out);
 
-	for (auto const& tuple : *magData) {
-		auto const x = std::get<0>(tuple);
-		auto const y = std::get<1>(tuple);
-		auto const z = std::get<2>(tuple);
-		auto const millis = std::get<3>(tuple);
-		auto const timeMillis = std::get<4>(tuple);
+	//for (auto const& tuple : *magData) {
+	//	auto const x = std::get<0>(tuple);
+	//	auto const y = std::get<1>(tuple);
+	//	auto const z = std::get<2>(tuple);
+	//	auto const millis = std::get<3>(tuple);
+	//	auto const timeMillis = std::get<4>(tuple);
 
-		magFileOut << x << ", " << y << ", " << z << ", " << millis << ", " << timeMillis << "\n";
-	}
+	//	magFileOut << x << ", " << y << ", " << z << ", " << millis << ", " << timeMillis << "\n";
+	//}
 
-    magFileOut.close();
+ //   magFileOut.close();
 }
 
 void BasicHologramMain::LoadAppState()

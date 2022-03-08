@@ -12,131 +12,159 @@
 #include "pch.h"
 #include "MagRenderer.h"
 #include "Common\DirectXHelper.h"
+
 #include <mutex>
+#include <string>
+#include <fstream>
+#include <filesystem>
 
 using namespace BasicHologram;
 using namespace DirectX;
+using namespace Windows::Storage;
+using namespace Platform;
 using namespace winrt::Windows::Foundation::Numerics;
 using namespace winrt::Windows::UI::Input::Spatial;
 
 // Loads vertex and pixel shaders from files and instantiates the cube geometry.
 void MagRenderer::MagUpdateLoop()
 {
-    uint64_t lastSocTick = 0; 
-    uint64_t lastHupTick = 0; 
-    LARGE_INTEGER qpf;
-    uint64_t lastQpcNow = 0;
+	uint64_t lastSocTick = 0;
+	uint64_t lastHupTick = 0;
+	LARGE_INTEGER qpf;
+	uint64_t lastQpcNow = 0;
 
-    // Cache the QueryPerformanceFrequency
-    QueryPerformanceFrequency(&qpf);
+	// Cache the QueryPerformanceFrequency
+	QueryPerformanceFrequency(&qpf);
 
-    winrt::check_hresult(m_pGyroSensor->OpenStream());
+	winrt::check_hresult(m_pGyroSensor->OpenStream());
 
-    while (!m_fExit)
-    {
-        char printString[1000];
+	//String^ folder = ApplicationData::Current->LocalFolder->Path + "\\Data";
+	//std::wstring folderW(folder->Begin());
+	//std::string folderA(folderW.begin(), folderW.end());
+	//const char* charStr = folderA.c_str();
+	//char file[512];
+	//std::snprintf(file, 512, "%s\\magnetometer.csv", charStr);
+	//std::ofstream fileOut(file, std::ios::out);
 
-        IResearchModeSensorFrame* pSensorFrame = nullptr;
-        IResearchModeMagFrame *pMagFrame = nullptr;
-        ResearchModeSensorTimestamp timeStamp;
-        const MagDataStruct *pMagBuffer = nullptr;
-        size_t BufferOutLength;
+	//fileOut << "#x, y, z, milliseconds, timeInMilliseconds\n";
 
-        winrt::check_hresult(m_pGyroSensor->GetNextBuffer(&pSensorFrame));
+	char printString[128];
+	sprintf(printString, "#### In MagRenderer loop\n");
+	OutputDebugStringA(printString);
 
-        winrt::check_hresult(pSensorFrame->QueryInterface(IID_PPV_ARGS(&pMagFrame)));
+	while (!m_fExit)
+	{
+		char printString[1000];
 
-        {
-            std::lock_guard<std::mutex> guard(m_sampleMutex);
+		IResearchModeSensorFrame* pSensorFrame = nullptr;
+		IResearchModeMagFrame* pMagFrame = nullptr;
+		ResearchModeSensorTimestamp timeStamp;
+		const MagDataStruct* pMagBuffer = nullptr;
+		size_t BufferOutLength;
 
-            winrt::check_hresult(pMagFrame->GetMagnetometer(&m_magSample));
-        }
+		winrt::check_hresult(m_pGyroSensor->GetNextBuffer(&pSensorFrame));
 
-        winrt::check_hresult(pMagFrame->GetMagnetometerSamples(
-            &pMagBuffer,
-            &BufferOutLength));
+		winrt::check_hresult(pSensorFrame->QueryInterface(IID_PPV_ARGS(&pMagFrame)));
 
-        lastHupTick = 0;
-        std::string hupTimeDeltas = "";
+		{
+			std::lock_guard<std::mutex> guard(m_sampleMutex);
 
-        for (UINT i = 0; i < BufferOutLength; i++)
-        {
-            pSensorFrame->GetTimeStamp(&timeStamp);
-            if (lastHupTick != 0)
-            {
-                if (pMagBuffer[i].VinylHupTicks < lastHupTick)
-                {
-                    sprintf(printString, "####MAG BAD HUP ORDERING\n");
-                    OutputDebugStringA(printString);
-                    DebugBreak();
-                }
-                sprintf(printString, " %I64d", (pMagBuffer[i].VinylHupTicks - lastHupTick) / 1000); // Microseconds
+			winrt::check_hresult(pMagFrame->GetMagnetometer(&m_magSample));
+		}
 
-                hupTimeDeltas = hupTimeDeltas + printString;
+		winrt::check_hresult(pMagFrame->GetMagnetometerSamples(
+			&pMagBuffer,
+			&BufferOutLength));
 
-            }
-            lastHupTick = pMagBuffer[i].VinylHupTicks;
-        }
+		lastHupTick = 0;
+		std::string hupTimeDeltas = "";
 
-        hupTimeDeltas = hupTimeDeltas + "\n";
-        //OutputDebugStringA(hupTimeDeltas.c_str());
+		for (UINT i = 0; i < BufferOutLength; i++)
+		{
+			pSensorFrame->GetTimeStamp(&timeStamp);
+			if (lastHupTick != 0)
+			{
+				if (pMagBuffer[i].VinylHupTicks < lastHupTick)
+				{
+					sprintf(printString, "####MAG BAD HUP ORDERING\n");
+					OutputDebugStringA(printString);
+					DebugBreak();
+				}
+				sprintf(printString, " %I64d", (pMagBuffer[i].VinylHupTicks - lastHupTick) / 1000); // Microseconds
 
-        pSensorFrame->GetTimeStamp(&timeStamp);
-        LARGE_INTEGER qpcNow;
-        uint64_t uqpcNow;
-        QueryPerformanceCounter(&qpcNow);
-        uqpcNow = qpcNow.QuadPart;
+				hupTimeDeltas = hupTimeDeltas + printString;
 
-        if (lastSocTick != 0)
-        {
-            uint64_t timeInMilliseconds =
-                (1000 *
-                (uqpcNow - lastQpcNow)) /
-                qpf.QuadPart;
+			}
+			lastHupTick = pMagBuffer[i].VinylHupTicks;
+		}
 
-            if (timeStamp.HostTicks < lastSocTick)
-            {
-                DebugBreak();
-            }
+		hupTimeDeltas = hupTimeDeltas + "\n";
+		//OutputDebugStringA(hupTimeDeltas.c_str());
 
-			m_magData.push_back({
-	            m_magSample.x,
-	            m_magSample.y,
-	            m_magSample.z,
-		        (((timeStamp.HostTicks - lastSocTick) * 1000) / timeStamp.HostTicksPerSecond),
-	            timeInMilliseconds
-			});
+		pSensorFrame->GetTimeStamp(&timeStamp);
+		LARGE_INTEGER qpcNow;
+		uint64_t uqpcNow;
+		QueryPerformanceCounter(&qpcNow);
+		uqpcNow = qpcNow.QuadPart;
 
-            //sprintf(printString, "####MAG: % 3.4f % 3.4f % 3.4f %I64d %I64d\n",
-            //    m_magSample.x,
-            //    m_magSample.y,
-            //    m_magSample.z,
-            //        (((timeStamp.HostTicks - lastSocTick) * 1000) / timeStamp.HostTicksPerSecond), // Milliseconds
-            //    timeInMilliseconds);
-            //OutputDebugStringA(printString);
-        }
-        lastSocTick = timeStamp.HostTicks;
-        lastQpcNow = uqpcNow;
+		if (lastSocTick != 0)
+		{
+			uint64_t timeInMilliseconds =
+				(1000 *
+					(uqpcNow - lastQpcNow)) /
+				qpf.QuadPart;
 
-        if (pSensorFrame)
-        {
-            pSensorFrame->Release();
-        }
+			if (timeStamp.HostTicks < lastSocTick)
+			{
+				DebugBreak();
+			}
 
-        if (pMagFrame)
-        {
-            pMagFrame->Release();
-        }
-    }
+			//m_magData.push_back({
+			//	m_magSample.x,
+			//	m_magSample.y,
+			//	m_magSample.z,
+			//	(((timeStamp.HostTicks - lastSocTick) * 1000) / timeStamp.HostTicksPerSecond),
+			//	timeInMilliseconds
+			//	});
 
-    winrt::check_hresult(m_pGyroSensor->CloseStream());
+			//fileOut
+			//	<< m_magSample.x << ", "
+			//	<< m_magSample.y << ", "
+			//	<< m_magSample.z << ", "
+			//	<< (((timeStamp.HostTicks - lastSocTick) * 1000) / timeStamp.HostTicksPerSecond) << ", " // Milliseconds
+			//	<< timeInMilliseconds << "\n";
+
+			sprintf(printString, "####THIS IS A TEST: % 3.4f % 3.4f % 3.4f %I64d %I64d\n",
+				m_magSample.x,
+				m_magSample.y,
+				m_magSample.z,
+				(((timeStamp.HostTicks - lastSocTick) * 1000) / timeStamp.HostTicksPerSecond), // Milliseconds
+				timeInMilliseconds);
+			OutputDebugStringA(printString);
+		}
+		lastSocTick = timeStamp.HostTicks;
+		lastQpcNow = uqpcNow;
+
+		if (pSensorFrame)
+		{
+			pSensorFrame->Release();
+		}
+
+		if (pMagFrame)
+		{
+			pMagFrame->Release();
+		}
+	}
+
+	//fileOut.close();
+	winrt::check_hresult(m_pGyroSensor->CloseStream());
 }
 
-void MagRenderer::GetMagSample(DirectX::XMFLOAT3 *pMagSample)
+void MagRenderer::GetMagSample(DirectX::XMFLOAT3* pMagSample)
 {
-    std::lock_guard<std::mutex> guard(m_sampleMutex);
+	std::lock_guard<std::mutex> guard(m_sampleMutex);
 
-    *pMagSample = m_magSample;
+	*pMagSample = m_magSample;
 }
 
 // This function uses a SpatialPointerPose to position the world-locked hologram
@@ -156,58 +184,58 @@ void MagRenderer::SetSensorFrame(IResearchModeSensorFrame* pSensorFrame)
 
 }
 
-void MagRenderer::MagUpdateThread(MagRenderer* pMagRenderer, HANDLE hasData, ResearchModeSensorConsent *pCamAccessConsent)
+void MagRenderer::MagUpdateThread(MagRenderer* pMagRenderer, HANDLE hasData, ResearchModeSensorConsent* pCamAccessConsent)
 {
-    HRESULT hr = S_OK;
+	HRESULT hr = S_OK;
 
-    if (hasData != nullptr)
-    {
-        DWORD waitResult = WaitForSingleObject(hasData, INFINITE);
+	if (hasData != nullptr)
+	{
+		DWORD waitResult = WaitForSingleObject(hasData, INFINITE);
 
-        if (waitResult == WAIT_OBJECT_0)
-        {
-            switch (*pCamAccessConsent)
-            {
-            case ResearchModeSensorConsent::Allowed:
-                OutputDebugString(L"Access is granted");
-                break;
-            case ResearchModeSensorConsent::DeniedBySystem:
-                OutputDebugString(L"Access is denied by the system");
-                hr = E_ACCESSDENIED;
-                break;
-            case ResearchModeSensorConsent::DeniedByUser:
-                OutputDebugString(L"Access is denied by the user");
-                hr = E_ACCESSDENIED;
-                break;
-            case ResearchModeSensorConsent::NotDeclaredByApp:
-                OutputDebugString(L"Capability is not declared in the app manifest");
-                hr = E_ACCESSDENIED;
-                break;
-            case ResearchModeSensorConsent::UserPromptRequired:
-                OutputDebugString(L"Capability user prompt required");
-                hr = E_ACCESSDENIED;
-                break;
-            default:
-                OutputDebugString(L"Access is denied by the system");
-                hr = E_ACCESSDENIED;
-                break;
-            }
-        }
-        else
-        {
-            hr = E_UNEXPECTED;
-        }
-    }
+		if (waitResult == WAIT_OBJECT_0)
+		{
+			switch (*pCamAccessConsent)
+			{
+			case ResearchModeSensorConsent::Allowed:
+				OutputDebugString(L"Access is granted");
+				break;
+			case ResearchModeSensorConsent::DeniedBySystem:
+				OutputDebugString(L"Access is denied by the system");
+				hr = E_ACCESSDENIED;
+				break;
+			case ResearchModeSensorConsent::DeniedByUser:
+				OutputDebugString(L"Access is denied by the user");
+				hr = E_ACCESSDENIED;
+				break;
+			case ResearchModeSensorConsent::NotDeclaredByApp:
+				OutputDebugString(L"Capability is not declared in the app manifest");
+				hr = E_ACCESSDENIED;
+				break;
+			case ResearchModeSensorConsent::UserPromptRequired:
+				OutputDebugString(L"Capability user prompt required");
+				hr = E_ACCESSDENIED;
+				break;
+			default:
+				OutputDebugString(L"Access is denied by the system");
+				hr = E_ACCESSDENIED;
+				break;
+			}
+		}
+		else
+		{
+			hr = E_UNEXPECTED;
+		}
+	}
 
-    if (FAILED(hr))
-    {
-        return;
-    }
+	if (FAILED(hr))
+	{
+		return;
+	}
 
-    pMagRenderer->MagUpdateLoop();
+	pMagRenderer->MagUpdateLoop();
 }
 
 void MagRenderer::UpdateSample()
 {
-    HRESULT hr = S_OK;
+	HRESULT hr = S_OK;
 }
