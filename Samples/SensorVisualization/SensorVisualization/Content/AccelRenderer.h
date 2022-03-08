@@ -19,61 +19,60 @@
 
 namespace BasicHologram
 {
-    // This sample renderer instantiates a basic rendering pipeline.
-    class AccelRenderer
-    {
-    public:
-        AccelRenderer(std::shared_ptr<DX::DeviceResources> const& deviceResources, IResearchModeSensor *pAccelSensor, HANDLE hasData, ResearchModeSensorConsent *pCamAccessConsent)
-        {
-            m_pAccelSensor = pAccelSensor;
-            m_pAccelSensor->AddRef();
-            m_pAccelUpdateThread = new std::thread(AccelUpdateThread, this, hasData, pCamAccessConsent);
-        }
-        virtual ~AccelRenderer()
-        {
-            m_fExit = true;
-            m_pAccelUpdateThread->join();
+	// This sample renderer instantiates a basic rendering pipeline.
+	class AccelRenderer
+	{
+	public:
+		AccelRenderer(std::shared_ptr<DX::DeviceResources> const& deviceResources, IResearchModeSensor* pAccelSensor, HANDLE hasData, ResearchModeSensorConsent* pCamAccessConsent)
+		{
+			m_pAccelSensor = pAccelSensor;
+			m_pAccelSensor->AddRef();
+			m_pAccelUpdateThread = new std::thread(AccelUpdateThread, this, hasData, pCamAccessConsent);
+		}
+		virtual ~AccelRenderer()
+		{
+			ExitLoop(true);
+			m_pAccelUpdateThread->join();
 
-            if (m_pAccelSensor)
-            {
-                m_pAccelSensor->CloseStream();
-                m_pAccelSensor->Release();
-            }
-        }
+			if (m_pAccelSensor)
+			{
+				m_pAccelSensor->CloseStream();
+				m_pAccelSensor->Release();
+			}
+		}
 
-        //using AccDataTuple = std::tuple<float, float, float, float, uint64_t, uint64_t>;
+		using AccDataTuple = std::tuple<float, float, float, float, uint64_t, uint64_t>;
 
-        //inline static std::string accFolderPath;
+		void Update(DX::StepTimer const& timer);
+		void UpdateSample();
 
-        void Update(DX::StepTimer const& timer);
-        void UpdateSample();
+		// Repositions the sample hologram.
+		void PositionHologram(winrt::Windows::UI::Input::Spatial::SpatialPointerPose const& pointerPose);
 
-        // Repositions the sample hologram.
-        void PositionHologram(winrt::Windows::UI::Input::Spatial::SpatialPointerPose const& pointerPose);
-
-        // Property accessors.
+		// Property accessors.
 		void SetSensorFrame(IResearchModeSensorFrame* pSensorFrame);
 
-        void GetAccelSample(DirectX::XMFLOAT3 *pAccleSample);
+		void GetAccelSample(DirectX::XMFLOAT3* pAccleSample);
 
-        //const std::vector<BasicHologram::AccelRenderer::AccDataTuple>* AccData() const { return &m_accData; }
-    private:
-        static void AccelUpdateThread(AccelRenderer* pSpinningCube, HANDLE hasData, ResearchModeSensorConsent *pCamAccessConsent);
-        void AccelUpdateLoop();
+		const std::vector<BasicHologram::AccelRenderer::AccDataTuple>* AccData() const { return &m_accData; }
+		void ExitLoop(bool val) { m_fExit = val; }
+	private:
+		static void AccelUpdateThread(AccelRenderer* pSpinningCube, HANDLE hasData, ResearchModeSensorConsent* pCamAccessConsent);
+		void AccelUpdateLoop();
 
-        // If the current D3D Device supports VPRT, we can avoid using a geometry
-        // shader just to set the render target array index.
-        bool                                            m_usingVprtShaders = false;
+		// If the current D3D Device supports VPRT, we can avoid using a geometry
+		// shader just to set the render target array index.
+		bool                                            m_usingVprtShaders = false;
 
-		IResearchModeSensor *m_pAccelSensor = nullptr;
+		IResearchModeSensor* m_pAccelSensor = nullptr;
 		IResearchModeSensorFrame* m_pSensorFrame;
-        DirectX::XMFLOAT3 m_accelSample;
-        std::mutex m_sampleMutex;
+		DirectX::XMFLOAT3 m_accelSample;
+		std::mutex m_sampleMutex;
 
-        std::thread *m_pAccelUpdateThread;
-        bool m_fExit = { false };
+		std::thread* m_pAccelUpdateThread;
+		bool m_fExit = false;
 
-		//std::vector<AccDataTuple> m_accData;
-    };
+		std::vector<AccDataTuple> m_accData;
+	};
 
 }

@@ -38,20 +38,6 @@ void MagRenderer::MagUpdateLoop()
 
 	winrt::check_hresult(m_pGyroSensor->OpenStream());
 
-	//String^ folder = ApplicationData::Current->LocalFolder->Path + "\\Data";
-	//std::wstring folderW(folder->Begin());
-	//std::string folderA(folderW.begin(), folderW.end());
-	//const char* charStr = folderA.c_str();
-	//char file[512];
-	//std::snprintf(file, 512, "%s\\magnetometer.csv", charStr);
-	//std::ofstream fileOut(file, std::ios::out);
-
-	//fileOut << "#x, y, z, milliseconds, timeInMilliseconds\n";
-
-	char printString[128];
-	sprintf(printString, "#### In MagRenderer loop\n");
-	OutputDebugStringA(printString);
-
 	while (!m_fExit)
 	{
 		char printString[1000];
@@ -119,28 +105,21 @@ void MagRenderer::MagUpdateLoop()
 				DebugBreak();
 			}
 
-			//m_magData.push_back({
-			//	m_magSample.x,
-			//	m_magSample.y,
-			//	m_magSample.z,
-			//	(((timeStamp.HostTicks - lastSocTick) * 1000) / timeStamp.HostTicksPerSecond),
-			//	timeInMilliseconds
-			//	});
-
-			//fileOut
-			//	<< m_magSample.x << ", "
-			//	<< m_magSample.y << ", "
-			//	<< m_magSample.z << ", "
-			//	<< (((timeStamp.HostTicks - lastSocTick) * 1000) / timeStamp.HostTicksPerSecond) << ", " // Milliseconds
-			//	<< timeInMilliseconds << "\n";
-
-			sprintf(printString, "####THIS IS A TEST: % 3.4f % 3.4f % 3.4f %I64d %I64d\n",
+			m_magData.push_back({
 				m_magSample.x,
 				m_magSample.y,
 				m_magSample.z,
-				(((timeStamp.HostTicks - lastSocTick) * 1000) / timeStamp.HostTicksPerSecond), // Milliseconds
-				timeInMilliseconds);
-			OutputDebugStringA(printString);
+				(((timeStamp.HostTicks - lastSocTick) * 1000) / timeStamp.HostTicksPerSecond),
+				timeInMilliseconds
+				});
+
+			//sprintf(printString, "####THIS IS A TEST: % 3.4f % 3.4f % 3.4f %I64d %I64d\n",
+			//	m_magSample.x,
+			//	m_magSample.y,
+			//	m_magSample.z,
+			//	(((timeStamp.HostTicks - lastSocTick) * 1000) / timeStamp.HostTicksPerSecond), // Milliseconds
+			//	timeInMilliseconds);
+			//OutputDebugStringA(printString);
 		}
 		lastSocTick = timeStamp.HostTicks;
 		lastQpcNow = uqpcNow;
@@ -156,7 +135,6 @@ void MagRenderer::MagUpdateLoop()
 		}
 	}
 
-	//fileOut.close();
 	winrt::check_hresult(m_pGyroSensor->CloseStream());
 }
 

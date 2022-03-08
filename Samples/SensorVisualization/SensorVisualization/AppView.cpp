@@ -27,18 +27,18 @@ using namespace winrt::Windows::UI::Core;
 // The main function bootstraps into the IFrameworkView.
 int __stdcall wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
 {
-    winrt::init_apartment();
-    CoreApplication::Run(winrt::make<AppViewSource>());
-    return 0;
+	winrt::init_apartment();
+	CoreApplication::Run(winrt::make<AppViewSource>());
+	return 0;
 }
 
 // IFrameworkViewSource methods
 
 IFrameworkView AppViewSource::CreateView()
 {
-    holographicView = winrt::make_self<AppView>();
+	holographicView = winrt::make_self<AppView>();
 
-    return holographicView.as<IFrameworkView>();
+	return holographicView.as<IFrameworkView>();
 }
 
 // IFrameworkView methods
@@ -47,53 +47,49 @@ IFrameworkView AppViewSource::CreateView()
 // Use this method to subscribe for Windows shell events and to initialize your app.
 void AppView::Initialize(CoreApplicationView const& applicationView)
 {
-    applicationView.Activated(std::bind(&AppView::OnViewActivated, this, _1, _2));
+	applicationView.Activated(std::bind(&AppView::OnViewActivated, this, _1, _2));
 
-    // Register event handlers for app lifecycle.
-    m_suspendingEventToken = CoreApplication::Suspending(bind(&AppView::OnSuspending, this, _1, _2));
-    m_resumingEventToken = CoreApplication::Resuming(bind(&AppView::OnResuming, this, _1, _2));
+	// Register event handlers for app lifecycle.
+	m_suspendingEventToken = CoreApplication::Suspending(bind(&AppView::OnSuspending, this, _1, _2));
+	m_resumingEventToken = CoreApplication::Resuming(bind(&AppView::OnResuming, this, _1, _2));
 
-    // At this point we have access to the device and we can create device-dependent
-    // resources.
-    m_deviceResources = std::make_shared<DX::DeviceResources>();
+	// At this point we have access to the device and we can create device-dependent
+	// resources.
+	m_deviceResources = std::make_shared<DX::DeviceResources>();
 
-    // Set static folder variables
-    /*auto folders = */Helper::SetupDataFolders();
-    //AccelRenderer::accFolderPath = std::get<0>(folders);
-    //GyroRenderer::gyroFolderPath = std::get<1>(folders);
-    //MagRenderer::magFolderPath = std::get<2>(folders);
+	Helper::SetupDataFolder();
 
-    m_main = std::make_unique<BasicHologramMain>(m_deviceResources);
+	m_main = std::make_unique<BasicHologramMain>(m_deviceResources);
 }
 
 // Called when the CoreWindow object is created (or re-created).
 void AppView::SetWindow(CoreWindow const& window)
 {
-    // Register for keypress notifications.
-    m_keyDownEventToken = window.KeyDown(bind(&AppView::OnKeyPressed, this, _1, _2));
+	// Register for keypress notifications.
+	m_keyDownEventToken = window.KeyDown(bind(&AppView::OnKeyPressed, this, _1, _2));
 
-    // Register for pointer pressed notifications.
-    m_pointerPressedEventToken = window.PointerPressed(bind(&AppView::OnPointerPressed, this, _1, _2));
+	// Register for pointer pressed notifications.
+	m_pointerPressedEventToken = window.PointerPressed(bind(&AppView::OnPointerPressed, this, _1, _2));
 
-    // Register for notification that the app window is being closed.
-    m_windowClosedEventToken = window.Closed(bind(&AppView::OnWindowClosed, this, _1, _2));
+	// Register for notification that the app window is being closed.
+	m_windowClosedEventToken = window.Closed(bind(&AppView::OnWindowClosed, this, _1, _2));
 
-    // Register for notifications that the app window is losing focus.
-    m_visibilityChangedEventToken = window.VisibilityChanged(bind(&AppView::OnVisibilityChanged, this, _1, _2));
+	// Register for notifications that the app window is losing focus.
+	m_visibilityChangedEventToken = window.VisibilityChanged(bind(&AppView::OnVisibilityChanged, this, _1, _2));
 
-    // Create a holographic space for the core window for the current view.
-    // Presenting holographic frames that are created by this holographic space will put
-    // the app into exclusive mode.
-    m_holographicSpace = HolographicSpace::CreateForCoreWindow(window);
+	// Create a holographic space for the core window for the current view.
+	// Presenting holographic frames that are created by this holographic space will put
+	// the app into exclusive mode.
+	m_holographicSpace = HolographicSpace::CreateForCoreWindow(window);
 
-    // The DeviceResources class uses the preferred DXGI adapter ID from the holographic
-    // space (when available) to create a Direct3D device. The HolographicSpace
-    // uses this ID3D11Device to create and manage device-based resources such as
-    // swap chains.
-    m_deviceResources->SetHolographicSpace(m_holographicSpace);
+	// The DeviceResources class uses the preferred DXGI adapter ID from the holographic
+	// space (when available) to create a Direct3D device. The HolographicSpace
+	// uses this ID3D11Device to create and manage device-based resources such as
+	// swap chains.
+	m_deviceResources->SetHolographicSpace(m_holographicSpace);
 
-    // The main class uses the holographic space for updates and rendering.
-    m_main->SetHolographicSpace(m_holographicSpace);
+	// The main class uses the holographic space for updates and rendering.
+	m_main->SetHolographicSpace(m_holographicSpace);
 }
 
 // The Load method can be used to initialize scene resources or to load a
@@ -106,43 +102,43 @@ void AppView::Load(winrt::hstring const& entryPoint)
 // update, draw, and present loop, and it also oversees window message processing.
 void AppView::Run()
 {
-    while (!m_windowClosed)
-    {
-        if (m_windowVisible && (m_holographicSpace != nullptr))
-        {
-            CoreWindow::GetForCurrentThread().Dispatcher().ProcessEvents(CoreProcessEventsOption::ProcessAllIfPresent);
+	while (!m_windowClosed)
+	{
+		if (m_windowVisible && (m_holographicSpace != nullptr))
+		{
+			CoreWindow::GetForCurrentThread().Dispatcher().ProcessEvents(CoreProcessEventsOption::ProcessAllIfPresent);
 
-            HolographicFrame holographicFrame = m_main->Update();
+			HolographicFrame holographicFrame = m_main->Update();
 
-            if (m_main->Render(holographicFrame))
-            {
-                // The holographic frame has an API that presents the swap chain for each
-                // holographic camera.
-                m_deviceResources->Present(holographicFrame);
-            }
-        }
-        else
-        {
-            CoreWindow::GetForCurrentThread().Dispatcher().ProcessEvents(CoreProcessEventsOption::ProcessOneAndAllPending);
-        }
-    }
+			if (m_main->Render(holographicFrame))
+			{
+				// The holographic frame has an API that presents the swap chain for each
+				// holographic camera.
+				m_deviceResources->Present(holographicFrame);
+			}
+		}
+		else
+		{
+			CoreWindow::GetForCurrentThread().Dispatcher().ProcessEvents(CoreProcessEventsOption::ProcessOneAndAllPending);
+		}
+	}
 }
 
 // Terminate events do not cause Uninitialize to be called. It will be called if your IFrameworkView
 // class is torn down while the app is in the foreground, for example if the Run method exits.
 void AppView::Uninitialize()
 {
-    m_main.reset();
-    m_deviceResources.reset();
+	m_main.reset();
+	m_deviceResources.reset();
 
-    CoreApplication::Suspending(m_suspendingEventToken);
-    CoreApplication::Resuming(m_resumingEventToken);
+	CoreApplication::Suspending(m_suspendingEventToken);
+	CoreApplication::Resuming(m_resumingEventToken);
 
-    auto const& window = CoreWindow::GetForCurrentThread();
-    window.KeyDown(m_keyDownEventToken);
-    window.PointerPressed(m_pointerPressedEventToken);
-    window.Closed(m_windowClosedEventToken);
-    window.VisibilityChanged(m_visibilityChangedEventToken);
+	auto const& window = CoreWindow::GetForCurrentThread();
+	window.KeyDown(m_keyDownEventToken);
+	window.PointerPressed(m_pointerPressedEventToken);
+	window.Closed(m_windowClosedEventToken);
+	window.VisibilityChanged(m_visibilityChangedEventToken);
 }
 
 
@@ -152,60 +148,64 @@ void AppView::Uninitialize()
 // and enable faster launch times.
 void AppView::OnLaunched(LaunchActivatedEventArgs const& args)
 {
-    if (args.PrelaunchActivated())
-    {
-        //
-        // TODO: Insert code to preload resources here.
-        //
-    }
+	if (args.PrelaunchActivated())
+	{
+		//
+		// TODO: Insert code to preload resources here.
+		//
+	}
 }
 
 // Called when the app view is activated. Activates the app's CoreWindow.
 void AppView::OnViewActivated(CoreApplicationView const& sender, IActivatedEventArgs const& args)
 {
-    // Run() won't start until the CoreWindow is activated.
-    sender.CoreWindow().Activate();
+	// Run() won't start until the CoreWindow is activated.
+	sender.CoreWindow().Activate();
 }
 
 void AppView::OnSuspending(winrt::Windows::Foundation::IInspectable const& sender, SuspendingEventArgs const& args)
 {
-    // Save app state asynchronously after requesting a deferral. Holding a deferral
-    // indicates that the application is busy performing suspending operations. Be
-    // aware that a deferral may not be held indefinitely; after about five seconds,
-    // the app will be forced to exit.
-    SuspendingDeferral deferral = args.SuspendingOperation().GetDeferral();
+	// Save app state asynchronously after requesting a deferral. Holding a deferral
+	// indicates that the application is busy performing suspending operations. Be
+	// aware that a deferral may not be held indefinitely; after about five seconds,
+	// the app will be forced to exit.
+	SuspendingDeferral deferral = args.SuspendingOperation().GetDeferral();
 
-    create_task([this, deferral]()
-    {
-        m_deviceResources->Trim();
+	create_task([this, deferral]()
+		{
+			m_deviceResources->Trim();
 
-        if (m_main != nullptr)
-        {
-            m_main->SaveAppState();
-        }
+			if (m_main != nullptr)
+			{
+				auto scenario = m_main->GetScenario();
+				scenario->GetAccelRenderer()->ExitLoop(true);
+				scenario->GetGyroRenderer()->ExitLoop(true);
+				scenario->GetMagRenderer()->ExitLoop(true);
+				m_main->SaveAppState();
+			}
 
-        //
-        // TODO: Insert code here to save your app state.
-        //
+			//
+			// TODO: Insert code here to save your app state.
+			//
 
-        deferral.Complete();
-    });
+			deferral.Complete();
+		});
 }
 
 void AppView::OnResuming(winrt::Windows::Foundation::IInspectable const& sender, winrt::Windows::Foundation::IInspectable const& args)
 {
-    // Restore any data or state that was unloaded on suspend. By default, data
-    // and state are persisted when resuming from suspend. Note that this event
-    // does not occur if the app was previously terminated.
+	// Restore any data or state that was unloaded on suspend. By default, data
+	// and state are persisted when resuming from suspend. Note that this event
+	// does not occur if the app was previously terminated.
 
-    if (m_main != nullptr)
-    {
-        m_main->LoadAppState();
-    }
+	if (m_main != nullptr)
+	{
+		m_main->LoadAppState();
+	}
 
-    //
-    // TODO: Insert code here to load your app state.
-    //
+	//
+	// TODO: Insert code here to load your app state.
+	//
 }
 
 
@@ -213,12 +213,12 @@ void AppView::OnResuming(winrt::Windows::Foundation::IInspectable const& sender,
 
 void AppView::OnVisibilityChanged(CoreWindow const& sender, VisibilityChangedEventArgs const& args)
 {
-    m_windowVisible = args.Visible();
+	m_windowVisible = args.Visible();
 }
 
 void AppView::OnWindowClosed(CoreWindow const& sender, CoreWindowEventArgs const& args)
 {
-    m_windowClosed = true;
+	m_windowClosed = true;
 }
 
 
@@ -226,35 +226,35 @@ void AppView::OnWindowClosed(CoreWindow const& sender, CoreWindowEventArgs const
 
 void AppView::OnKeyPressed(CoreWindow const& sender, KeyEventArgs const& args)
 {
-    //
-    // TODO: Bluetooth keyboards are supported by HoloLens. You can use this method for
-    //       keyboard input if you want to support it as an optional input method for
-    //       your holographic app.
-    //
-    if (m_main != nullptr)
-    {
-        int32_t code = (int32_t)args.VirtualKey();
-        if (args.VirtualKey() == winrt::Windows::System::VirtualKey::A)
-        {
-            m_main->OnKeyPressed(1);
-        }
-        if (args.VirtualKey() == winrt::Windows::System::VirtualKey::L)
-        {
-            m_main->OnKeyPressed(2);
-        }
-        if (args.VirtualKey() == winrt::Windows::System::VirtualKey::B)
-        {
-            m_main->OnKeyPressed(0);
-        }
-    }
+	//
+	// TODO: Bluetooth keyboards are supported by HoloLens. You can use this method for
+	//       keyboard input if you want to support it as an optional input method for
+	//       your holographic app.
+	//
+	if (m_main != nullptr)
+	{
+		int32_t code = (int32_t)args.VirtualKey();
+		if (args.VirtualKey() == winrt::Windows::System::VirtualKey::A)
+		{
+			m_main->OnKeyPressed(1);
+		}
+		if (args.VirtualKey() == winrt::Windows::System::VirtualKey::L)
+		{
+			m_main->OnKeyPressed(2);
+		}
+		if (args.VirtualKey() == winrt::Windows::System::VirtualKey::B)
+		{
+			m_main->OnKeyPressed(0);
+		}
+	}
 }
 
 void AppView::OnPointerPressed(CoreWindow const& sender, PointerEventArgs const& args)
 {
-    // Allow the user to interact with the holographic world using the mouse.
-    if (m_main != nullptr)
-    {
-        m_main->OnPointerPressed();
-    }
+	// Allow the user to interact with the holographic world using the mouse.
+	if (m_main != nullptr)
+	{
+		m_main->OnPointerPressed();
+	}
 }
 

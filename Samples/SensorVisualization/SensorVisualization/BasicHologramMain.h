@@ -120,6 +120,7 @@ namespace BasicHologram
             m_fUseWorldSpace = true;
         }
 
+        std::shared_ptr<BasicHologram::Scenario> GetScenario() const { return m_scenario; }
     private:
         // Asynchronously creates resources for new holographic cameras.
         void OnCameraAdded(
@@ -207,5 +208,7 @@ namespace BasicHologram
 
         // Cache whether or not the HolographicCameraRenderingParameters.CommitDirect3D11DepthBuffer() method can be called.
         bool                                                        m_canCommitDirect3D11DepthBuffer = false;
+
+        std::mutex m_dataMutex;
     };
 }

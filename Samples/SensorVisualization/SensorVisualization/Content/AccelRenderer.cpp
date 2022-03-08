@@ -38,20 +38,6 @@ void AccelRenderer::AccelUpdateLoop()
 
 	winrt::check_hresult(m_pAccelSensor->OpenStream());
 
-	//String^ folder = ApplicationData::Current->LocalFolder->Path + "\\Data";
-	//std::wstring folderW(folder->Begin());
-	//std::string folderA(folderW.begin(), folderW.end());
-	//const char* charStr = folderA.c_str();
-	//char file[512];
-	//std::snprintf(file, 512, "%s\\accelerometer.csv", charStr);
-	//std::ofstream fileOut(file, std::ios::out);
-
-	//fileOut << "#x, y, z, sqrtSum, milliseconds, timeInMilliseconds\n";
-
-	char printString[128];
-	sprintf(printString, "#### In AccelRenderer loop\n");
-	OutputDebugStringA(printString);
-
 	while (!m_fExit)
 	{
 		char printString[1000];
@@ -119,31 +105,23 @@ void AccelRenderer::AccelUpdateLoop()
 				DebugBreak();
 			}
 
-			//m_accData.push_back({
-			//	m_accelSample.x,
-			//	m_accelSample.y,
-			//	m_accelSample.z,
-			//	sqrt(m_accelSample.x * m_accelSample.x + m_accelSample.y * m_accelSample.y + m_accelSample.z * m_accelSample.z),
-			//	(((timeStamp.HostTicks - lastSocTick) * 1000) / timeStamp.HostTicksPerSecond),
-			//	timeInMilliseconds
-			//	});
-
-			//fileOut
-			//	<< m_accelSample.x << ", "
-			//	<< m_accelSample.y << ", "
-			//	<< m_accelSample.z << ", "
-			//	<< sqrt(m_accelSample.x * m_accelSample.x + m_accelSample.y * m_accelSample.y + m_accelSample.z * m_accelSample.z) << ", "
-			//	<< (((timeStamp.HostTicks - lastSocTick) * 1000) / timeStamp.HostTicksPerSecond) << ", " // Milliseconds
-			//	<< timeInMilliseconds << "\n";
-
-			sprintf(printString, "####Accel: % 3.4f % 3.4f % 3.4f %f %I64d %I64d\n",
+			m_accData.push_back({
 				m_accelSample.x,
 				m_accelSample.y,
 				m_accelSample.z,
 				sqrt(m_accelSample.x * m_accelSample.x + m_accelSample.y * m_accelSample.y + m_accelSample.z * m_accelSample.z),
 				(((timeStamp.HostTicks - lastSocTick) * 1000) / timeStamp.HostTicksPerSecond), // Milliseconds
-				timeInMilliseconds);
-			OutputDebugStringA(printString);
+				timeInMilliseconds
+				});
+
+			//sprintf(printString, "####Accel: % 3.4f % 3.4f % 3.4f %f %I64d %I64d\n",
+			//	m_accelSample.x,
+			//	m_accelSample.y,
+			//	m_accelSample.z,
+			//	sqrt(m_accelSample.x * m_accelSample.x + m_accelSample.y * m_accelSample.y + m_accelSample.z * m_accelSample.z),
+			//	(((timeStamp.HostTicks - lastSocTick) * 1000) / timeStamp.HostTicksPerSecond), // Milliseconds
+			//	timeInMilliseconds);
+			//OutputDebugStringA(printString);
 		}
 		lastSocTick = timeStamp.HostTicks;
 		lastQpcNow = uqpcNow;
@@ -159,7 +137,6 @@ void AccelRenderer::AccelUpdateLoop()
 		}
 	}
 
-	//fileOut.close();
 	winrt::check_hresult(m_pAccelSensor->CloseStream());
 }
 

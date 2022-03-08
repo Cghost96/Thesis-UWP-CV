@@ -270,25 +270,16 @@ void SensorVisualizationScenario::IntializeModelRendering()
 
 	if (m_pAccelSensor)
 	{
-		char printString[128];
-		sprintf(printString, "#### Making AccelRenderer\n");
-		OutputDebugStringA(printString);
 		m_AccelRenderer = std::make_shared<AccelRenderer>(m_deviceResources, m_pAccelSensor, imuConsentGiven, &imuAccessCheck);
 	}
 
 	if (m_pGyroSensor)
 	{
-		char printString[128];
-		sprintf(printString, "#### Making GyroRenderer\n");
-		OutputDebugStringA(printString);
 		m_GyroRenderer = std::make_shared<GyroRenderer>(m_deviceResources, m_pGyroSensor, imuConsentGiven, &imuAccessCheck);
 	}
 
 	if (m_pMagSensor)
 	{
-		char printString[128];
-		sprintf(printString, "#### Making MagRenderer\n");
-		OutputDebugStringA(printString);
 		m_MagRenderer = std::make_shared<MagRenderer>(m_deviceResources, m_pMagSensor, imuConsentGiven, &imuAccessCheck);
 	}
 }

@@ -22,61 +22,60 @@
 
 namespace BasicHologram
 {
-    // This sample renderer instantiates a basic rendering pipeline.
-    class MagRenderer
-    {
-    public:
-        MagRenderer(std::shared_ptr<DX::DeviceResources> const& deviceResources, IResearchModeSensor *pAccelSensor, HANDLE hasData, ResearchModeSensorConsent *pCamAccessConsent)
-        {
-            m_pGyroSensor = pAccelSensor;
-            m_pGyroSensor->AddRef();
-            m_pAccelUpdateThread = new std::thread(MagUpdateThread, this, hasData, pCamAccessConsent);
-        }
-        virtual ~MagRenderer()
-        {
-            m_fExit = true;
-            m_pAccelUpdateThread->join();
+	// This sample renderer instantiates a basic rendering pipeline.
+	class MagRenderer
+	{
+	public:
+		MagRenderer(std::shared_ptr<DX::DeviceResources> const& deviceResources, IResearchModeSensor* pAccelSensor, HANDLE hasData, ResearchModeSensorConsent* pCamAccessConsent)
+		{
+			m_pGyroSensor = pAccelSensor;
+			m_pGyroSensor->AddRef();
+			m_pAccelUpdateThread = new std::thread(MagUpdateThread, this, hasData, pCamAccessConsent);
+		}
+		virtual ~MagRenderer()
+		{
+			ExitLoop(true);
+			m_pAccelUpdateThread->join();
 
-            if (m_pGyroSensor)
-            {
-                m_pGyroSensor->CloseStream();
-                m_pGyroSensor->Release();
-            }
-        }
+			if (m_pGyroSensor)
+			{
+				m_pGyroSensor->CloseStream();
+				m_pGyroSensor->Release();
+			}
+		}
 
-        //using MagDataTuple = std::tuple<float, float, float, uint64_t, uint64_t>;
+		using MagDataTuple = std::tuple<float, float, float, uint64_t, uint64_t>;
 
-        //inline static std::string magFolderPath;
+		void Update(DX::StepTimer const& timer);
+		void UpdateSample();
 
-        void Update(DX::StepTimer const& timer);
-        void UpdateSample();
+		// Repositions the sample hologram.
+		void PositionHologram(winrt::Windows::UI::Input::Spatial::SpatialPointerPose const& pointerPose);
 
-        // Repositions the sample hologram.
-        void PositionHologram(winrt::Windows::UI::Input::Spatial::SpatialPointerPose const& pointerPose);
-
-        // Property accessors.
+		// Property accessors.
 		void SetSensorFrame(IResearchModeSensorFrame* pSensorFrame);
 
-        void GetMagSample(DirectX::XMFLOAT3 *pAccleSample);
+		void GetMagSample(DirectX::XMFLOAT3* pAccleSample);
 
-        //const std::vector<BasicHologram::MagRenderer::MagDataTuple>* MagData() const { return &m_magData; }
-    private:
-        static void MagUpdateThread(MagRenderer* pSpinningCube, HANDLE hasData, ResearchModeSensorConsent *pCamAccessConsent);
-        void MagUpdateLoop();
+		const std::vector<BasicHologram::MagRenderer::MagDataTuple>* MagData() const { return &m_magData; }
+		void ExitLoop(bool val) { m_fExit = val; }
+	private:
+		static void MagUpdateThread(MagRenderer* pSpinningCube, HANDLE hasData, ResearchModeSensorConsent* pCamAccessConsent);
+		void MagUpdateLoop();
 
-        // If the current D3D Device supports VPRT, we can avoid using a geometry
-        // shader just to set the render target array index.
-        bool                                            m_usingVprtShaders = false;
+		// If the current D3D Device supports VPRT, we can avoid using a geometry
+		// shader just to set the render target array index.
+		bool                                            m_usingVprtShaders = false;
 
-		IResearchModeSensor *m_pGyroSensor = nullptr;
+		IResearchModeSensor* m_pGyroSensor = nullptr;
 		IResearchModeSensorFrame* m_pSensorFrame;
-        DirectX::XMFLOAT3 m_magSample;
-        std::mutex m_sampleMutex;
+		DirectX::XMFLOAT3 m_magSample;
+		std::mutex m_sampleMutex;
 
-        std::thread *m_pAccelUpdateThread;
-        bool m_fExit = { false };
+		std::thread* m_pAccelUpdateThread;
+		bool m_fExit = false;
 
-		//std::vector<MagDataTuple> m_magData;
-    };
+		std::vector<MagDataTuple> m_magData;
+	};
 
 }
