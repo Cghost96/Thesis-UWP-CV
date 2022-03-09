@@ -105,13 +105,13 @@ void MagRenderer::MagUpdateLoop()
 				DebugBreak();
 			}
 
-			m_magData.push_back({
+			m_magData.emplace_back(
 				m_magSample.x,
 				m_magSample.y,
 				m_magSample.z,
 				(((timeStamp.HostTicks - lastSocTick) * 1000) / timeStamp.HostTicksPerSecond),
 				timeInMilliseconds
-				});
+			);
 
 			//sprintf(printString, "####THIS IS A TEST: % 3.4f % 3.4f % 3.4f %I64d %I64d\n",
 			//	m_magSample.x,

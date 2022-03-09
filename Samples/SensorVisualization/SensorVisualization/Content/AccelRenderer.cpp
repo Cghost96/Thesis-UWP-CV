@@ -104,15 +104,16 @@ void AccelRenderer::AccelUpdateLoop()
 			{
 				DebugBreak();
 			}
-
-			m_accData.push_back({
+			
+			// Construct in-place in vectors memory
+			m_accData.emplace_back(
 				m_accelSample.x,
 				m_accelSample.y,
 				m_accelSample.z,
 				sqrt(m_accelSample.x * m_accelSample.x + m_accelSample.y * m_accelSample.y + m_accelSample.z * m_accelSample.z),
 				(((timeStamp.HostTicks - lastSocTick) * 1000) / timeStamp.HostTicksPerSecond), // Milliseconds
 				timeInMilliseconds
-				});
+			);
 
 			//sprintf(printString, "####Accel: % 3.4f % 3.4f % 3.4f %f %I64d %I64d\n",
 			//	m_accelSample.x,
